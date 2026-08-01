@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
       - uses: actions/setup-go@v5
-        with: { go-version: '1.24' }
+        with: { go-version: '1.24', cache: false }
       - run: cd verify-controller && go build -trimpath -ldflags='-s -w' -o bin/verify-loop ./cmd/verify-loop
       - run: mvn -B -ntp -f backend/pom.xml test
       - run: npm ci --prefix frontend && npm run build --prefix frontend

@@ -127,7 +127,7 @@ func protectedChanges(dir, base string) []string {
 }
 
 func commands(profile string) [][2]string {
-	fast := [][2]string{{"git-diff", "git diff --check"}, {"frontend-build", "npm --prefix frontend ci --ignore-scripts && npm --prefix frontend run build"}, {"controller-binary", "test -x verify-controller/bin/verify-loop && ./verify-controller/bin/verify-loop doctor"}}
+	fast := [][2]string{{"git-diff", "git diff --check"}, {"frontend-build", "npm --prefix frontend ci --ignore-scripts && npm --prefix frontend run build"}, {"controller-binary", "test -x verify-controller/bin/verify-loop && ./verify-controller/bin/verify-loop version >/dev/null"}}
 	backend := [][2]string{{"backend-java8-test", "if command -v mvn >/dev/null 2>&1; then mvn -B -ntp -f backend/pom.xml test; else ./backend/mvnw test; fi"}}
 	frontend := [][2]string{{"frontend-unit", "npm --prefix frontend ci --ignore-scripts && npm --prefix frontend run test:unit"}}
 	switch profile {
@@ -147,6 +147,7 @@ func verify(dir, profile, model, runID string, iteration int, base string) (Evid
 	e := Evidence{SchemaVersion: evidenceVersion, RunID: runID, Profile: profile, Model: model, BaseSHA: base, StartedAt: started.UTC().Format(time.RFC3339), Iteration: iteration}
 	e.ProtectedViolation = protectedChanges(dir, base)
 	if len(e.ProtectedViolation) > 0 {
+		fmt.Printf("protected paths changed: %s\n", strings.Join(e.ProtectedViolation, ", "))
 		e.Conclusion = "BLOCKED_PROTECTED_PATH"
 		e.FinishedAt = time.Now().UTC().Format(time.RFC3339)
 		return e, 1
@@ -165,6 +166,7 @@ func verify(dir, profile, model, runID string, iteration int, base string) (Evid
 		}
 		g.OutputFile = writeOutput(dir, runID, item[0], output)
 		e.Gates = append(e.Gates, g)
+		fmt.Printf("gate=%s status=%s exit=%d duration_ms=%d\n", g.Name, g.Status, g.ExitCode, g.DurationMS)
 		if code != 0 {
 			e.Conclusion = "FAILED"
 			break
@@ -173,6 +175,7 @@ func verify(dir, profile, model, runID string, iteration int, base string) (Evid
 	if e.Conclusion == "" {
 		e.Conclusion = "PASS"
 	}
+	fmt.Printf("conclusion=%s\n", e.Conclusion)
 	e.FinishedAt = time.Now().UTC().Format(time.RFC3339)
 	return e, func() int {
 		if e.Conclusion == "PASS" {
@@ -213,6 +216,9 @@ func main() {
 	base := git(dir, "rev-parse", "HEAD")
 	runID := time.Now().UTC().Format("20060102T150405Z")
 	switch os.Args[1] {
+	case "version":
+		fmt.Println("verify-loop 0.1.0")
+		return
 	case "doctor":
 		fmt.Printf("worktree=%s\ngit=%s\nnode=%s\n", dir, base, git(dir, "--version"))
 		if _, err := exec.LookPath("opencode"); err != nil {

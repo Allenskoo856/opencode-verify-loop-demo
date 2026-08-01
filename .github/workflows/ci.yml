@@ -30,12 +30,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
-        with: { go-version: '1.24' }
+        with: { go-version: '1.24', cache: false }
       - run: gofmt -w verify-controller/cmd/verify-loop/main.go verify-controller/internal/redact_test.go
       - run: git diff --exit-code
       - run: cd verify-controller && go test ./...
       - run: cd verify-controller && go build -trimpath -ldflags='-s -w' -o bin/verify-loop ./cmd/verify-loop
       - run: ./verify-controller/bin/verify-loop verify --profile auto
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: verify-controller-evidence, path: artifacts/verify, if-no-files-found: ignore }
   config:
     runs-on: ubuntu-24.04
     steps:
