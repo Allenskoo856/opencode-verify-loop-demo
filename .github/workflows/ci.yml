@@ -25,6 +25,38 @@ jobs:
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: '8', cache: maven }
       - run: mvn -B -ntp test
+  e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - run: npm ci --prefix frontend
+      - run: npx --prefix frontend playwright install --with-deps chromium
+      - run: docker compose -f deploy/compose.dev.yml up --build -d
+        env:
+          POSTGRES_PASSWORD: ci-postgres-password
+          JWT_SECRET: ci-jwt-secret-that-is-long-enough-for-tests
+          DEMO_USER: demo@example.com
+          DEMO_PASSWORD: demo-password-only-for-local
+      - run: curl --fail --retry 30 --retry-delay 2 http://localhost:8080/actuator/health
+      - run: npm --prefix frontend run test:e2e
+        env:
+          E2E_BASE_URL: http://localhost:4173
+          E2E_USER: demo@example.com
+          E2E_PASSWORD: demo-password-only-for-local
+      - if: always()
+        run: docker compose -f deploy/compose.dev.yml logs --no-color > artifacts-compose.log || true
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results
+          path: |
+            frontend/test-results
+            artifacts-compose.log
+          if-no-files-found: ignore
+      - if: always()
+        run: docker compose -f deploy/compose.dev.yml down -v
   controller:
     runs-on: ubuntu-24.04
     steps:
