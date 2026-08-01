@@ -107,20 +107,18 @@ func protectedChanges(dir, base string) []string {
 		if file == "" {
 			continue
 		}
-		if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "e2e/specs/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
+		if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "e2e/specs/") || strings.HasPrefix(file, "verify/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
 			bad = append(bad, file)
 		}
 	}
-	if base == "HEAD" {
-		status := git(dir, "status", "--porcelain")
-		for _, line := range strings.Split(status, "\n") {
-			if len(line) < 4 {
-				continue
-			}
-			file := strings.TrimSpace(line[3:])
-			if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "e2e/specs/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
-				bad = append(bad, file)
-			}
+	status := git(dir, "status", "--porcelain")
+	for _, line := range strings.Split(status, "\n") {
+		if len(line) < 4 {
+			continue
+		}
+		file := strings.TrimSpace(line[3:])
+		if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "e2e/specs/") || strings.HasPrefix(file, "verify/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
+			bad = append(bad, file)
 		}
 	}
 	return bad
@@ -222,9 +220,10 @@ func main() {
 	case "doctor":
 		fmt.Printf("worktree=%s\ngit=%s\nnode=%s\n", dir, base, git(dir, "--version"))
 		if _, err := exec.LookPath("opencode"); err != nil {
-			fmt.Fprintln(os.Stderr, "opencode not found")
-			os.Exit(2)
+			fmt.Println("opencode=missing (verify is available; run requires OpenCode)")
+			return
 		}
+		fmt.Println("opencode=available")
 		return
 	case "status":
 		path := filepath.Join(dir, "artifacts", "verify")

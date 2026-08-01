@@ -75,6 +75,11 @@ jobs:
       - run: cd verify-controller && go test ./...
       - run: cd verify-controller && go build -trimpath -ldflags='-s -w' -o bin/verify-loop ./cmd/verify-loop
       - run: ./verify-controller/bin/verify-loop verify --profile auto
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: verify-controller-ts/package-lock.json }
+      - run: npm ci --prefix verify-controller-ts
+      - run: npm test --prefix verify-controller-ts
+      - run: node verify-controller-ts/dist/verify-loop.js verify --profile auto
       - if: always()
         uses: actions/upload-artifact@v4
         with: { name: verify-controller-evidence, path: artifacts/verify, if-no-files-found: ignore }

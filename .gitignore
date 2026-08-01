@@ -1,6 +1,7 @@
 # Node
 node_modules/
 frontend/dist/
+verify-controller-ts/dist/
 frontend/test-results/
 frontend/playwright-report/
 coverage/

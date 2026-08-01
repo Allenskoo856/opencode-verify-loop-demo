@@ -5,6 +5,8 @@ cd "$root_dir"
 test -f backend/pom.xml
 test -f frontend/package.json
 test -f verify-controller/policy.yaml
+test -f verify/policy.json
+test -f verify-controller-ts/package.json
 test -f opencode.json
 test "$(git diff --check | wc -l | tr -d ' ')" = 0
 if rg -n --hidden -g '!node_modules' -g '!package-lock.json' -g '!*.lock' '(sk-[A-Za-z0-9]{20,}|Bearer [A-Za-z0-9._-]{40,})' .; then

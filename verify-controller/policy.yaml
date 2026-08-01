@@ -1,8 +1,11 @@
 version: 1
+# Legacy static-Go fallback only. The canonical, extensible policy is
+# verify/policy.json and is interpreted by verify-controller-ts.
 protected:
   - .opencode/**
   - e2e/specs/**
-  - verify-controller/policy.yaml
+  - verify/policy.json
+  - verify/gates/**
   - offline/SHA256SUMS
 completion:
   required_profiles: [auto, backend, frontend, full, staging]

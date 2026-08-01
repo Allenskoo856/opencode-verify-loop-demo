@@ -45,7 +45,8 @@ export E2E_USER='专用测试账号'
 export E2E_PASSWORD='从密钥系统注入'
 export ALLOW_MUTATING_E2E=true
 export NODE_EXTRA_CA_CERTS=/etc/pki/company/ca.pem
-./verify-controller/bin/verify-loop verify --profile staging
+STAGING_HEALTH_URL=https://orders-staging.intra.example/actuator/health \
+node verify-controller-ts/dist/verify-loop.js verify --profile staging
 ```
 
 只有 `TARGET_ENV=staging` 且显式设置 `ALLOW_MUTATING_E2E=true` 时才允许创建/取消订单。生产只使用 `production-readonly` 运行健康检查、登录策略和只读页面加载，控制器必须拒绝写操作。`--allow-host` 或 E2E 域名配置只限制测试目标，不等于出网防火墙策略；出网仍需由企业代理/防火墙控制。

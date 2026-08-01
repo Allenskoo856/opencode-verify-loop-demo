@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "verify/policy/v1",
+  "protected": [
+    ".opencode/**",
+    "e2e/specs/**",
+    "verify/policy.json",
+    "verify/gates/**",
+    "offline/SHA256SUMS"
+  ],
+  "defaults": { "timeoutSeconds": 1200 },
+  "profiles": {
+    "auto": ["git-diff", "frontend-build", "controller-node-test"],
+    "backend": ["git-diff", "backend-java8-test"],
+    "frontend": ["git-diff", "frontend-unit"],
+    "full": ["git-diff", "backend-java8-test", "frontend-unit", "compose-playwright-e2e"],
+    "staging": ["staging-target-guard", "staging-health", "staging-api-contract", "staging-browser-e2e"]
+  },
+  "gates": {
+    "git-diff": { "runner": "shell", "command": "git diff --check" },
+    "frontend-build": { "runner": "shell", "command": "npm --prefix frontend ci --ignore-scripts && npm --prefix frontend run build" },
+    "controller-node-test": { "runner": "shell", "command": "npm --prefix verify-controller-ts ci --ignore-scripts && npm --prefix verify-controller-ts run test" },
+    "backend-java8-test": { "runner": "shell", "command": "if command -v mvn >/dev/null 2>&1; then mvn -B -ntp -f backend/pom.xml test; else ./backend/mvnw test; fi" },
+    "frontend-unit": { "runner": "shell", "command": "npm --prefix frontend ci --ignore-scripts && npm --prefix frontend run test:unit" },
+    "compose-playwright-e2e": { "runner": "shell", "command": "bash verify/gates/compose-e2e.sh", "timeoutSeconds": 1800 },
+    "staging-target-guard": { "runner": "module", "module": "verify/gates/staging-target-guard.cjs", "requires": { "TARGET_ENV": "staging", "ALLOW_MUTATING_E2E": "true" } },
+    "staging-health": { "runner": "http", "url": "${STAGING_HEALTH_URL}", "expectedStatus": 200, "requires": { "TARGET_ENV": "staging", "STAGING_HEALTH_URL": "present" } },
+    "staging-api-contract": { "runner": "module", "module": "verify/gates/orders-api-contract.cjs", "requires": { "TARGET_ENV": "staging", "ALLOW_MUTATING_E2E": "true", "API_BASE_URL": "present", "E2E_USER": "present", "E2E_PASSWORD": "present" } },
+    "staging-browser-e2e": { "runner": "shell", "command": "npm --prefix frontend run test:e2e", "requires": { "TARGET_ENV": "staging", "ALLOW_MUTATING_E2E": "true", "E2E_BASE_URL": "present", "E2E_USER": "present", "E2E_PASSWORD": "present" } }
+  }
+}

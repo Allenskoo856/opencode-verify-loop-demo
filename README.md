@@ -4,7 +4,7 @@
 
 ## 核心原则
 
-模型负责修改代码和解释失败原因；`verify-loop` 负责启动服务、执行测试、收集证据和决定是否完成。`session.idle` 只能用于提示，不能作为循环主控。OpenCode 的 Stop 重入能力目前仍在演进，因此主循环运行在 OpenCode 进程之外。
+模型负责修改代码和解释失败原因；外部 `verify-loop` 负责启动服务、执行测试、收集证据和决定是否完成。`session.idle` 只能用于提示，不能作为验收结论。循环调度可选 OpenCode CLI 或 `@bybrawe/opencode-loop`，但两者都必须调用外部 Controller 的 Profile。
 
 ## 快速开始
 
@@ -19,15 +19,16 @@ cd frontend && npm ci && npm run dev
 ## Verify Loop
 
 ```bash
-./verify-controller/bin/verify-loop run \
+node verify-controller-ts/dist/verify-loop.js run \
   --task-file docs/tasks/order-feature.md \
-  --profile auto \
+  --profile full \
   --model glm5
 ```
 
 完整手册见：
 
 - [Verify Controller](docs/VERIFY-CONTROLLER.md)
+- [OpenCode Loop 适配](docs/OPENCODE-LOOP.md)
 - [API、真实环境与前端自动化测试](docs/TESTING-MANUAL.md)
 - [OpenCode 插件和 Skills](docs/OPENCODE-INTEGRATION.md)
 - [UOS/Debian 10 离线部署](docs/INTRANET-OFFLINE.md)

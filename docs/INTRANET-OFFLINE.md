@@ -2,7 +2,7 @@
 
 ## 介质内容
 
-发布包包含前端、后端、PostgreSQL 和 Verify Controller 的 Linux AMD64 镜像归档，静态 `verify-loop`、离线 Compose、环境模板和 `SHA256SUMS`。OpenCode CLI、模型服务、源码依赖缓存和企业凭据不包含在介质内；Skills、插件和手册随 Git 仓库交付，需一并带入内网或使用仓库压缩包。
+发布包包含前端、后端、PostgreSQL 和 Verify Controller 的 Linux AMD64 镜像归档，静态 Go `verify-loop`、编译后的 Node `verify-loop.js`、离线 Compose、策略/Gate、环境模板和 `SHA256SUMS`。OpenCode CLI、模型服务、源码依赖缓存和企业凭据不包含在介质内；Skills、插件和手册随 Git 仓库交付，需一并带入内网或使用仓库压缩包。
 
 ## 安装
 
@@ -12,7 +12,8 @@ sha256sum -c SHA256SUMS
 cp .env.offline.example .env
 $EDITOR .env
 docker compose --env-file .env -f deploy/compose.offline.yml up -d
-./verify-controller/bin/verify-loop verify --profile full
+./verify-controller/bin/verify-loop verify --profile auto  # 无 Node 时的离线兜底
+node verify-controller-ts/dist/verify-loop.js verify --profile full  # Node 20+，可配置 Profile/Gate
 ```
 
 安装器不联网、不覆盖全局 OpenCode 配置，目标目录已有配置时先备份再合并项目配置。若使用 Podman，改用 `--runtime podman`。
