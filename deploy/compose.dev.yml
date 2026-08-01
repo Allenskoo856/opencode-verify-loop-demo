@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:14-alpine}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-orders}
+      POSTGRES_USER: ${POSTGRES_USER:-orders}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-only-for-local}
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U orders -d orders"], interval: 5s, timeout: 3s, retries: 20 }
+    volumes: [orders-data:/var/lib/postgresql/data]
+  backend:
+    build: { context: ../backend }
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/orders
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-orders}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-change-me-only-for-local}
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-32-byte-value}
+      DEMO_USER: ${DEMO_USER:-demo@example.com}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-demo-password-only-for-local}
+    depends_on: { postgres: { condition: service_healthy } }
+    ports: ["8080:8080"]
+  frontend:
+    build: { context: ../frontend }
+    depends_on: [backend]
+    ports: ["4173:80"]
+volumes: { orders-data: {} }

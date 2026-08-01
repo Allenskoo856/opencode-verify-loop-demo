@@ -1,0 +1,12 @@
+{
+  "name": "opencode-verify-loop-demo",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Enterprise Verify Loop demo for OpenCode with Vue 3 and Spring Boot 2.7/Java 8",
+  "scripts": {
+    "verify:controller": "go test ./verify-controller/...",
+    "verify:frontend": "npm --prefix frontend run verify",
+    "verify:skills": "python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .opencode/skills/enterprise-verify-loop && python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .opencode/skills/springboot27-java8 && python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .opencode/skills/vue3-playwright",
+    "verify:config": "bash scripts/verify-config.sh"
+  }
+}

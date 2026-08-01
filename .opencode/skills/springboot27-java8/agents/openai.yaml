@@ -1,0 +1,4 @@
+interface:
+  display_name: "Springboot27 Java8"
+  short_description: "Keep Spring Boot code Java 8 compatible"
+  default_prompt: "Use $springboot27-java8 to implement and test this Spring Boot 2.7 backend with Java 8 gates."

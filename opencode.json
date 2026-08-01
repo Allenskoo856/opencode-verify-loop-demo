@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["./.opencode/plugins/verify-policy.ts"],
+  "permission": {
+    "edit": "allow",
+    "bash": "ask",
+    "webfetch": "deny"
+  },
+  "instructions": [
+    ".opencode/skills/enterprise-verify-loop/SKILL.md",
+    ".opencode/skills/springboot27-java8/SKILL.md",
+    ".opencode/skills/vue3-playwright/SKILL.md"
+  ]
+}

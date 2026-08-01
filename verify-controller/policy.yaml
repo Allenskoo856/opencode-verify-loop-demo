@@ -1,0 +1,10 @@
+version: 1
+protected:
+  - .opencode/**
+  - e2e/specs/**
+  - verify-controller/policy.yaml
+  - offline/SHA256SUMS
+completion:
+  required_profiles: [auto, backend, frontend, full, staging]
+  max_iterations: 5
+  require_fresh_evidence: true

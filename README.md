@@ -1,0 +1,37 @@
+# OpenCode Verify Loop Demo
+
+这是一个可在企业内网落地的 AI 编程验收样板：Vue 3 + TypeScript 前端、Spring Boot 2.7.18 + Java 8 后端，以及不信任模型完成声明的外部 Verify Controller。
+
+## 核心原则
+
+模型负责修改代码和解释失败原因；`verify-loop` 负责启动服务、执行测试、收集证据和决定是否完成。`session.idle` 只能用于提示，不能作为循环主控。OpenCode 的 Stop 重入能力目前仍在演进，因此主循环运行在 OpenCode 进程之外。
+
+## 快速开始
+
+```bash
+cp .env.example .env
+docker compose -f deploy/compose.dev.yml up --build -d
+cd frontend && npm ci && npm run dev
+```
+
+后端健康检查：`http://localhost:8080/actuator/health`；前端：`http://localhost:5173`。
+
+## Verify Loop
+
+```bash
+./verify-controller/bin/verify-loop run \
+  --task-file docs/tasks/order-feature.md \
+  --profile auto \
+  --model glm5
+```
+
+完整手册见：
+
+- [Verify Controller](docs/VERIFY-CONTROLLER.md)
+- [API、真实环境与前端自动化测试](docs/TESTING-MANUAL.md)
+- [OpenCode 插件和 Skills](docs/OPENCODE-INTEGRATION.md)
+- [UOS/Debian 10 离线部署](docs/INTRANET-OFFLINE.md)
+
+## 许可证
+
+Apache-2.0。第三方组件和镜像的许可证见 `THIRD-PARTY-NOTICES`（由发布工作流生成）。

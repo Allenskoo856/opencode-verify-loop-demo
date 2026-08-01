@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vue3 Playwright"
+  short_description: "Build Vue UI with real Playwright evidence"
+  default_prompt: "Use $vue3-playwright to implement this Vue 3 feature and add isolated Playwright coverage."

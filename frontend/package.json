@@ -1,0 +1,31 @@
+{
+  "name": "verify-loop-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "verify": "npm run build && npm run test:unit"
+  },
+  "dependencies": {
+    "axios": "1.19.0",
+    "pinia": "4.0.2",
+    "vue": "3.5.40",
+    "vue-router": "5.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.10.1",
+    "@vitejs/plugin-vue": "6.0.8",
+    "@vue/test-utils": "2.4.11",
+    "jsdom": "27.1.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "4.1.10",
+    "vue-tsc": "3.2.4"
+  }
+}

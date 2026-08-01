@@ -1,0 +1,33 @@
+name: offline-media
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '8', cache: maven }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.24' }
+      - run: cd verify-controller && go build -trimpath -ldflags='-s -w' -o bin/verify-loop ./cmd/verify-loop
+      - run: mvn -B -ntp -f backend/pom.xml test
+      - run: npm ci --prefix frontend && npm run build --prefix frontend
+      - run: docker build --platform linux/amd64 -t opencode-verify-controller:${GITHUB_SHA} verify-controller
+      - run: docker build --platform linux/amd64 -t opencode-verify-backend:${GITHUB_SHA} backend
+      - run: docker build --platform linux/amd64 -t opencode-verify-frontend:${GITHUB_SHA} frontend
+      - run: mkdir -p offline/out && docker save -o offline/out/controller.tar opencode-verify-controller:${GITHUB_SHA} && docker save -o offline/out/backend.tar opencode-verify-backend:${GITHUB_SHA} && docker save -o offline/out/frontend.tar opencode-verify-frontend:${GITHUB_SHA}
+      - run: cp verify-controller/bin/verify-loop offline/out/ && cp .env.example offline/out/.env.offline.example && (cd offline/out && sha256sum * > SHA256SUMS && tar -cf ../opencode-verify-loop-offline-${GITHUB_SHA}.tar .)
+      - run: docker image rm opencode-verify-controller:${GITHUB_SHA} opencode-verify-backend:${GITHUB_SHA} opencode-verify-frontend:${GITHUB_SHA}
+      - run: mkdir offline/smoke && tar -xf offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar -C offline/smoke && sha256sum -c offline/smoke/SHA256SUMS && docker load -i offline/smoke/controller.tar
+      - uses: actions/upload-artifact@v4
+        with: { name: offline-media, path: 'offline/opencode-verify-loop-offline-*.tar' }
+      - if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with: { files: 'offline/opencode-verify-loop-offline-*.tar' }

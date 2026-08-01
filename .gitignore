@@ -1,0 +1,28 @@
+# Node
+node_modules/
+frontend/dist/
+frontend/test-results/
+frontend/playwright-report/
+coverage/
+
+# Java
+backend/target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Verification outputs
+artifacts/
+.verify/
+offline/out/
+*.log
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Go
+verify-controller/bin/

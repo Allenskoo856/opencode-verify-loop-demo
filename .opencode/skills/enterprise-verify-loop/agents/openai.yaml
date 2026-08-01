@@ -1,0 +1,4 @@
+interface:
+  display_name: "Enterprise Verify Loop"
+  short_description: "Run deterministic external verification loops"
+  default_prompt: "Use $enterprise-verify-loop to implement this change and require fresh external PASS evidence."

@@ -1,0 +1,23 @@
+server:
+  port: ${SERVER_PORT:8080}
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/orders}
+    username: ${SPRING_DATASOURCE_USERNAME:orders}
+    password: ${SPRING_DATASOURCE_PASSWORD:change-me-only-for-local}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+app:
+  jwt-secret: ${JWT_SECRET:change-me-to-a-random-32-byte-value}
+  jwt-ttl-seconds: ${JWT_TTL_SECONDS:3600}
+  demo-user: ${DEMO_USER:demo@example.com}
+  demo-password: ${DEMO_PASSWORD:demo-password-only-for-local}
