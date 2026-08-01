@@ -39,21 +39,28 @@ jobs:
           JWT_SECRET: ci-jwt-secret-that-is-long-enough-for-tests
           DEMO_USER: demo@example.com
           DEMO_PASSWORD: demo-password-only-for-local
-      - run: curl --fail --retry 30 --retry-delay 2 http://localhost:8080/actuator/health
+      # Java may still be starting after Compose has started the container. Retry
+      # transient connection resets as well as connection refusals.
+      - run: |
+          curl --fail --retry 60 --retry-all-errors --retry-delay 2 \
+            http://localhost:8080/actuator/health
       - run: npm --prefix frontend run test:e2e
         env:
           E2E_BASE_URL: http://localhost:4173
           E2E_USER: demo@example.com
           E2E_PASSWORD: demo-password-only-for-local
       - if: always()
-        run: docker compose -f deploy/compose.dev.yml logs --no-color > artifacts-compose.log || true
+        run: |
+          mkdir -p artifacts-compose
+          docker compose -f deploy/compose.dev.yml ps -a > artifacts-compose/compose-ps.txt || true
+          docker compose -f deploy/compose.dev.yml logs --no-color > artifacts-compose/compose.log || true
       - if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-results
           path: |
             frontend/test-results
-            artifacts-compose.log
+            artifacts-compose
           if-no-files-found: ignore
       - if: always()
         run: docker compose -f deploy/compose.dev.yml down -v
