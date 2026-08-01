@@ -34,4 +34,4 @@ cd frontend && npm ci && npm run dev
 
 ## 许可证
 
-Apache-2.0。第三方组件和镜像的许可证见 `THIRD-PARTY-NOTICES`（由发布工作流生成）。
+Apache-2.0。基础镜像和第三方组件应按企业发布流程补充许可证清单。

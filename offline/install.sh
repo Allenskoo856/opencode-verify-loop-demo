@@ -11,6 +11,8 @@ unpack_dir=$(mktemp -d "${TMPDIR:-/tmp}/verify-loop-offline.XXXXXX")
 trap 'rm -rf "$unpack_dir"' EXIT
 tar -xf "$bundle" -C "$unpack_dir"
 find "$unpack_dir" -maxdepth 1 -type f -name '*.tar' -print0 | while IFS= read -r -d '' image; do "$runtime" load -i "$image"; done
+mkdir -p ./verify-controller/bin ./deploy
 install -m 0755 "$unpack_dir/verify-loop" ./verify-controller/bin/verify-loop
 cp -n "$unpack_dir/.env.offline.example" .env.offline.example 2>/dev/null || true
+cp -n "$unpack_dir/compose.offline.yml" deploy/compose.offline.yml 2>/dev/null || true
 echo "offline bundle installed with $runtime; no network request was made"

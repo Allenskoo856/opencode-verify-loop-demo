@@ -2,7 +2,7 @@
 
 ## 介质内容
 
-发布包包含前端、后端、PostgreSQL、E2E Runner 和 Verify Controller 镜像归档，Linux AMD64 静态 `verify-loop`，源码/锁文件、Skills、插件、Compose、环境模板、SBOM、第三方许可证和 `SHA256SUMS`。OpenCode CLI、模型服务和企业凭据不包含在介质内。
+发布包包含前端、后端、PostgreSQL 和 Verify Controller 的 Linux AMD64 镜像归档，静态 `verify-loop`、离线 Compose、环境模板和 `SHA256SUMS`。OpenCode CLI、模型服务、源码依赖缓存和企业凭据不包含在介质内；Skills、插件和手册随 Git 仓库交付，需一并带入内网或使用仓库压缩包。
 
 ## 安装
 

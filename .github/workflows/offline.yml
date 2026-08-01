@@ -19,14 +19,15 @@ jobs:
       - run: cd verify-controller && go build -trimpath -ldflags='-s -w' -o bin/verify-loop ./cmd/verify-loop
       - run: mvn -B -ntp -f backend/pom.xml test
       - run: npm ci --prefix frontend && npm run build --prefix frontend
-      - run: docker build --platform linux/amd64 -t opencode-verify-controller:${GITHUB_SHA} verify-controller
-      - run: docker build --platform linux/amd64 -t opencode-verify-backend:${GITHUB_SHA} backend
-      - run: docker build --platform linux/amd64 -t opencode-verify-frontend:${GITHUB_SHA} frontend
-      - run: mkdir -p offline/out && docker save -o offline/out/controller.tar opencode-verify-controller:${GITHUB_SHA} && docker save -o offline/out/backend.tar opencode-verify-backend:${GITHUB_SHA} && docker save -o offline/out/frontend.tar opencode-verify-frontend:${GITHUB_SHA}
-      - run: cp verify-controller/bin/verify-loop offline/out/ && cp .env.example offline/out/.env.offline.example && (cd offline/out && sha256sum * > SHA256SUMS && tar -cf ../opencode-verify-loop-offline-${GITHUB_SHA}.tar .)
+      - run: docker build --platform linux/amd64 -t opencode-verify-controller:offline verify-controller
+      - run: docker build --platform linux/amd64 -t opencode-verify-backend:offline backend
+      - run: docker build --platform linux/amd64 -t opencode-verify-frontend:offline frontend
+      - run: docker pull --platform linux/amd64 postgres:14-alpine && docker tag postgres:14-alpine opencode-verify-postgres:14
+      - run: mkdir -p offline/out && docker save -o offline/out/controller.tar opencode-verify-controller:offline && docker save -o offline/out/backend.tar opencode-verify-backend:offline && docker save -o offline/out/frontend.tar opencode-verify-frontend:offline && docker save -o offline/out/postgres.tar opencode-verify-postgres:14
+      - run: cp verify-controller/bin/verify-loop offline/out/ && cp .env.offline.example offline/out/.env.offline.example && cp deploy/compose.offline.yml offline/out/compose.offline.yml && (cd offline/out && sha256sum * > SHA256SUMS && tar -cf ../opencode-verify-loop-offline-${GITHUB_SHA}.tar .)
       - run: sha256sum offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar > offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar.sha256
-      - run: docker image rm opencode-verify-controller:${GITHUB_SHA} opencode-verify-backend:${GITHUB_SHA} opencode-verify-frontend:${GITHUB_SHA}
-      - run: mkdir offline/smoke && tar -xf offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar -C offline/smoke && (cd offline/smoke && sha256sum -c SHA256SUMS && docker load -i controller.tar)
+      - run: docker image rm opencode-verify-controller:offline opencode-verify-backend:offline opencode-verify-frontend:offline opencode-verify-postgres:14
+      - run: mkdir offline/smoke && tar -xf offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar -C offline/smoke && (cd offline/smoke && sha256sum -c SHA256SUMS && docker load -i controller.tar && docker load -i backend.tar && docker load -i frontend.tar && docker load -i postgres.tar && docker run --rm --network none opencode-verify-controller:offline doctor)
       - uses: actions/upload-artifact@v4
         with: { name: offline-media, path: 'offline/opencode-verify-loop-offline-*' }
       - if: startsWith(github.ref, 'refs/tags/')
