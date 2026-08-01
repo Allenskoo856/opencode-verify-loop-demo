@@ -24,10 +24,11 @@ jobs:
       - run: docker build --platform linux/amd64 -t opencode-verify-frontend:${GITHUB_SHA} frontend
       - run: mkdir -p offline/out && docker save -o offline/out/controller.tar opencode-verify-controller:${GITHUB_SHA} && docker save -o offline/out/backend.tar opencode-verify-backend:${GITHUB_SHA} && docker save -o offline/out/frontend.tar opencode-verify-frontend:${GITHUB_SHA}
       - run: cp verify-controller/bin/verify-loop offline/out/ && cp .env.example offline/out/.env.offline.example && (cd offline/out && sha256sum * > SHA256SUMS && tar -cf ../opencode-verify-loop-offline-${GITHUB_SHA}.tar .)
+      - run: sha256sum offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar > offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar.sha256
       - run: docker image rm opencode-verify-controller:${GITHUB_SHA} opencode-verify-backend:${GITHUB_SHA} opencode-verify-frontend:${GITHUB_SHA}
-      - run: mkdir offline/smoke && tar -xf offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar -C offline/smoke && sha256sum -c offline/smoke/SHA256SUMS && docker load -i offline/smoke/controller.tar
+      - run: mkdir offline/smoke && tar -xf offline/opencode-verify-loop-offline-${GITHUB_SHA}.tar -C offline/smoke && (cd offline/smoke && sha256sum -c SHA256SUMS && docker load -i controller.tar)
       - uses: actions/upload-artifact@v4
-        with: { name: offline-media, path: 'offline/opencode-verify-loop-offline-*.tar' }
+        with: { name: offline-media, path: 'offline/opencode-verify-loop-offline-*' }
       - if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
-        with: { files: 'offline/opencode-verify-loop-offline-*.tar' }
+        with: { files: 'offline/opencode-verify-loop-offline-*' }

@@ -13,4 +13,5 @@ cp "$root_dir/verify-controller/bin/verify-loop" "$out_dir/verify-loop"
 cp "$root_dir/.env.example" "$out_dir/.env.offline.example"
 sha256sum "$out_dir"/* > "$out_dir/SHA256SUMS"
 tar -C "$out_dir" -cf "$root_dir/offline/opencode-verify-loop-offline-$tag.tar" .
+sha256sum "$root_dir/offline/opencode-verify-loop-offline-$tag.tar" > "$root_dir/offline/opencode-verify-loop-offline-$tag.tar.sha256"
 echo "built offline/opencode-verify-loop-offline-$tag.tar"
