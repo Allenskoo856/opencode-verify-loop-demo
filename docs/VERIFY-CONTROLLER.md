@@ -45,7 +45,7 @@ node verify-controller-ts/dist/verify-loop.js run \
   --max-iterations 5
 ```
 
-第 1 轮向 OpenCode 发送任务；每一轮失败后只回灌脱敏后的证据路径和失败日志，要求模型修复实现。控制器会校验 `.opencode/`、`e2e/specs/`、`verify/` 和离线校验文件是否变化，不能通过删除测试或放宽规则获取成功。循环没有自动 `git commit` 或 `git push`。
+第 1 轮向 OpenCode 发送任务；每一轮失败后只回灌脱敏后的证据路径和失败日志，要求模型修复实现。控制器会校验 `docs/tasks/`、`.opencode/`、`e2e/specs/`、`verify/` 和离线校验文件是否变化，不能通过删除测试或放宽规则获取成功。循环没有自动 `git commit` 或 `git push`。
 
 ## 证据格式
 

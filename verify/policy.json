@@ -2,6 +2,7 @@
   "schemaVersion": "verify/policy/v1",
   "protected": [
     ".opencode/**",
+    "docs/tasks/**",
     "e2e/specs/**",
     "verify/policy.json",
     "verify/gates/**",

@@ -18,4 +18,4 @@ cd frontend
 npx playwright init-agents --loop=opencode
 ```
 
-生成的 planner、generator、healer 只能维护 `e2e/` 测试，不得修改 `verify/policy.json` 或 `verify/gates/`。Oh My OpenAgent 和 OpenCode Loop 如需使用，必须先审计来源、版本、许可证和安装脚本，并保持 Goal/Todo 与外部 PASS 解耦；不能把社区 Ralph 或 Loop 的完成标记当成验收。
+生成的 planner、generator、healer 只能维护 `e2e/` 测试，不得修改 `docs/tasks/`、`verify/policy.json` 或 `verify/gates/`。Oh My OpenAgent 和 OpenCode Loop 如需使用，必须先审计来源、版本、许可证和安装脚本，并保持 Goal/Todo 与外部 PASS 解耦；不能把社区 Ralph 或 Loop 的完成标记当成验收。

@@ -107,7 +107,7 @@ func protectedChanges(dir, base string) []string {
 		if file == "" {
 			continue
 		}
-		if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "e2e/specs/") || strings.HasPrefix(file, "verify/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
+		if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "docs/tasks/") || strings.HasPrefix(file, "e2e/specs/") || strings.HasPrefix(file, "verify/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
 			bad = append(bad, file)
 		}
 	}
@@ -117,7 +117,7 @@ func protectedChanges(dir, base string) []string {
 			continue
 		}
 		file := strings.TrimSpace(line[3:])
-		if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "e2e/specs/") || strings.HasPrefix(file, "verify/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
+		if strings.HasPrefix(file, ".opencode/") || strings.HasPrefix(file, "docs/tasks/") || strings.HasPrefix(file, "e2e/specs/") || strings.HasPrefix(file, "verify/") || file == "verify-controller/policy.yaml" || file == "offline/SHA256SUMS" {
 			bad = append(bad, file)
 		}
 	}

@@ -10,6 +10,7 @@ test('expands only declared uppercase environment variables', () => {
 test('detects exact and recursive protected paths', () => {
   assert.equal(isProtectedPath('verify/policy.json', ['verify/policy.json']), true)
   assert.equal(isProtectedPath('verify/gates/api-contract.cjs', ['verify/gates/**']), true)
+  assert.equal(isProtectedPath('docs/tasks/new-feature.md', ['docs/tasks/**']), true)
   assert.equal(isProtectedPath('frontend/src/App.vue', ['verify/gates/**']), false)
 })
 

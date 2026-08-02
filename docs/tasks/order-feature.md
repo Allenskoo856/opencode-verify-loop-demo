@@ -9,4 +9,4 @@
 5. 已取消订单再次取消必须保持幂等，不得产生第二条订单。
 6. 后端 API、数据库集成测试和前端 Playwright 测试必须通过。
 
-不要修改 `verify-controller/policy.yaml`、`.opencode/`、`e2e/specs/` 或离线校验文件来规避失败。
+不要修改 `docs/tasks/`、`verify/`、`.opencode/`、`e2e/specs/` 或离线校验文件来规避失败。

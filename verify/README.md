@@ -8,4 +8,4 @@
 
 Gate 可声明 `requires`。值为 `present` 表示变量必须存在，其他值必须完全匹配。涉及写数据的 staging Gate 必须同时要求 `TARGET_ENV=staging` 和 `ALLOW_MUTATING_E2E=true`。不要把密钥写入 policy 或 Gate，全部从环境变量或企业密钥系统注入。
 
-`verify/` 是验收资产，必须由 CODEOWNERS 或受管仓库保护；模型只可修复业务代码和测试失败，不得改动验收资产来制造 PASS。
+`verify/` 与 `docs/tasks/` 都是验收资产，必须由 CODEOWNERS 或受管仓库保护；模型只可修复业务代码和测试失败，不得改动验收资产来制造 PASS。

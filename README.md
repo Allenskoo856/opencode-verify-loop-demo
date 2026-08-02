@@ -28,6 +28,7 @@ node verify-controller-ts/dist/verify-loop.js run \
 完整手册见：
 
 - [Verify Controller](docs/VERIFY-CONTROLLER.md)
+- [企业内网完整使用手册](docs/INTRANET-USAGE-MANUAL.md)
 - [OpenCode Loop 适配](docs/OPENCODE-LOOP.md)
 - [API、真实环境与前端自动化测试](docs/TESTING-MANUAL.md)
 - [OpenCode 插件和 Skills](docs/OPENCODE-INTEGRATION.md)
