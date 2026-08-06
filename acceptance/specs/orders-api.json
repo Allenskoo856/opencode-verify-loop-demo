@@ -1,0 +1,186 @@
+{
+  "schemaVersion": "acceptance/v1",
+  "id": "orders-api",
+  "source": "docs/tasks/order-feature.md",
+  "safety": {
+    "mutates": true,
+    "allowedEnvironments": ["local", "staging"]
+  },
+  "api": {
+    "baseUrl": "${API_BASE_URL}",
+    "cases": [
+      {
+        "id": "auth.rejects-invalid-password",
+        "description": "错误密码必须返回可理解的未授权结果",
+        "requirementIds": ["2"],
+        "steps": [
+          {
+            "id": "login-invalid",
+            "request": {
+              "method": "POST",
+              "path": "/auth/login",
+              "json": {
+                "email": "${E2E_USER}",
+                "password": "wrong-password"
+              }
+            },
+            "expect": {
+              "status": 401,
+              "json": [
+                { "path": "$.error", "present": true, "type": "string" }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "orders.require-authentication",
+        "description": "没有令牌不能访问订单 API",
+        "requirementIds": ["1", "6"],
+        "steps": [
+          {
+            "id": "list-without-token",
+            "request": { "method": "GET", "path": "/orders" },
+            "expect": { "status": 401 }
+          }
+        ]
+      },
+      {
+        "id": "orders.create-cancel-is-idempotent",
+        "description": "真实登录后创建订单，取消必须持久化且重复取消幂等",
+        "requirementIds": ["3", "4", "5", "6"],
+        "steps": [
+          {
+            "id": "login",
+            "request": {
+              "method": "POST",
+              "path": "/auth/login",
+              "json": {
+                "email": "${E2E_USER}",
+                "password": "${E2E_PASSWORD}"
+              }
+            },
+            "expect": {
+              "status": 200,
+              "json": [
+                { "path": "$.accessToken", "present": true, "type": "string" }
+              ]
+            },
+            "capture": { "token": "$.accessToken" }
+          },
+          {
+            "id": "list",
+            "request": {
+              "method": "GET",
+              "path": "/orders",
+              "headers": { "Authorization": "Bearer ${token}" }
+            },
+            "expect": { "status": 200 }
+          },
+          {
+            "id": "create",
+            "request": {
+              "method": "POST",
+              "path": "/orders",
+              "headers": { "Authorization": "Bearer ${token}" },
+              "json": { "title": "verify-${timestamp}-${uuid}" }
+            },
+            "expect": {
+              "status": 201,
+              "json": [
+                { "path": "$.id", "present": true, "type": "string" },
+                { "path": "$.status", "equals": "CREATED" },
+                { "path": "$.createdAt", "present": true }
+              ]
+            },
+            "capture": { "orderId": "$.id" }
+          },
+          {
+            "id": "cancel",
+            "request": {
+              "method": "POST",
+              "path": "/orders/${orderId}/cancel",
+              "headers": { "Authorization": "Bearer ${token}" }
+            },
+            "expect": {
+              "status": 200,
+              "json": [
+                { "path": "$.status", "equals": "CANCELLED" }
+              ]
+            }
+          },
+          {
+            "id": "cancel-again",
+            "request": {
+              "method": "POST",
+              "path": "/orders/${orderId}/cancel",
+              "headers": { "Authorization": "Bearer ${token}" }
+            },
+            "expect": {
+              "status": 200,
+              "json": [
+                { "path": "$.status", "equals": "CANCELLED" }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "orders.validate-title",
+        "description": "空标题和超长标题必须被后端拒绝",
+        "requirementIds": ["3", "6"],
+        "steps": [
+          {
+            "id": "login",
+            "request": {
+              "method": "POST",
+              "path": "/auth/login",
+              "json": {
+                "email": "${E2E_USER}",
+                "password": "${E2E_PASSWORD}"
+              }
+            },
+            "expect": { "status": 200 },
+            "capture": { "token": "$.accessToken" }
+          },
+          {
+            "id": "empty-title",
+            "request": {
+              "method": "POST",
+              "path": "/orders",
+              "headers": { "Authorization": "Bearer ${token}" },
+              "json": { "title": "" }
+            },
+            "expect": { "status": 400 }
+          },
+          {
+            "id": "overlong-title",
+            "request": {
+              "method": "POST",
+              "path": "/orders",
+              "headers": { "Authorization": "Bearer ${token}" },
+              "json": { "title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+            },
+            "expect": { "status": 400 }
+          }
+        ]
+      }
+    ]
+  },
+  "frontend": {
+    "runner": "playwright",
+    "projectTarget": "frontend.e2e",
+    "cases": [
+      {
+        "id": "orders.login-create-cancel",
+        "testFile": "frontend/e2e/orders.spec.ts",
+        "requirementIds": ["1", "3", "4", "5", "6"]
+      },
+      {
+        "id": "auth.invalid-login-and-redirect",
+        "testFile": "frontend/e2e/orders.spec.ts",
+        "requirementIds": ["1", "2"]
+      }
+    ]
+  }
+}

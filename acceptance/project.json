@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "acceptance/project/v1",
+  "backend": {
+    "runtime": {
+      "language": "java",
+      "languageVersion": "8",
+      "framework": "spring-boot",
+      "frameworkVersion": "2.7.18"
+    },
+    "test": {
+      "cwd": "backend",
+      "command": "if command -v mvn >/dev/null 2>&1; then mvn -B -ntp test; else ./mvnw -B -ntp test; fi"
+    }
+  },
+  "frontend": {
+    "build": {
+      "cwd": "frontend",
+      "command": "npm ci --ignore-scripts && npm run build"
+    },
+    "unit": {
+      "cwd": "frontend",
+      "command": "npm ci --ignore-scripts && npm run test:unit"
+    },
+    "e2e": {
+      "cwd": "frontend",
+      "command": "npm run test:e2e"
+    }
+  }
+}

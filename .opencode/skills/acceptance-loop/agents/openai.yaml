@@ -1,0 +1,4 @@
+interface:
+  display_name: "Acceptance Loop"
+  short_description: "Generate protected API and frontend acceptance loops"
+  default_prompt: "Use $acceptance-loop to turn this requirement into reviewed API and frontend acceptance assets."

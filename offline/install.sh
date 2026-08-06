@@ -18,4 +18,12 @@ cp -n "$unpack_dir/.env.offline.example" .env.offline.example 2>/dev/null || tru
 cp -n "$unpack_dir/compose.offline.yml" deploy/compose.offline.yml 2>/dev/null || true
 cp -n "$unpack_dir/policy.json" verify/policy.json 2>/dev/null || true
 if [ -d "$unpack_dir/gates" ]; then cp -n "$unpack_dir"/gates/*.cjs verify/gates/ 2>/dev/null || true; fi
+if [ -d "$unpack_dir/acceptance" ]; then
+  find "$unpack_dir/acceptance" -type f -print0 | while IFS= read -r -d '' file; do
+    relative_path=${file#"$unpack_dir"/}
+    target="./$relative_path"
+    mkdir -p "$(dirname "$target")"
+    if [ ! -e "$target" ]; then install -m 0644 "$file" "$target"; fi
+  done
+fi
 echo "offline bundle installed with $runtime; no network request was made"

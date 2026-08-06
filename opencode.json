@@ -8,6 +8,7 @@
   },
   "instructions": [
     ".opencode/skills/enterprise-verify-loop/SKILL.md",
+    ".opencode/skills/acceptance-loop/SKILL.md",
     ".opencode/skills/springboot27-java8/SKILL.md",
     ".opencode/skills/vue3-playwright/SKILL.md"
   ]

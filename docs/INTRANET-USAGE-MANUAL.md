@@ -11,7 +11,7 @@
 | Verify Controller | 执行 Profile、写证据、阻止受保护文件被改动 | 不判断需求是否合理 |
 | OpenCode Loop（可选） | 模型空闲后继续下一轮 | 不能作为验收裁判 |
 
-受保护验收资产为 `docs/tasks/`、`verify/`、`.opencode/`、`e2e/specs/` 和离线校验文件。模型可以创建 `docs/work/` 下的工作计划、修复记录或 TODO；该目录不应放验收条件。
+受保护验收资产为 `docs/tasks/`、`verify/`、`.opencode/`、`e2e/specs/`、`frontend/e2e/`、`acceptance/specs/`、`acceptance/project.json` 和离线校验文件。模型可以创建 `docs/work/` 下的工作计划、修复记录或 TODO；该目录不应放冻结后的验收条件。
 
 ## 2. 环境准备
 
@@ -57,11 +57,14 @@ curl --fail http://localhost:8080/actuator/health
 | `auto` | 编写过程中快速反馈 | Git 检查、前端构建、TS 控制器测试 |
 | `backend` | Java/API/数据库改动 | Git 检查、Java 8 Maven 测试 |
 | `frontend` | Vue 页面、状态、组件改动 | Git 检查、Vitest |
+| `frontend-e2e` | 已启动目标服务后的真实浏览器验收 | Git 检查、项目适配的 Playwright/Cypress 命令 |
+| `api` | 已启动目标服务后的真实 HTTP API 验收 | Git 检查、`acceptance/v1` contract |
 | `full` | 跨前后端或合并前 | 后端、前端、Compose、Playwright |
 | `staging` | 专用内网测试环境 | 环境护栏、健康检查、API 合同、浏览器 E2E |
 
 ```bash
 node verify-controller-ts/dist/verify-loop.js verify --profile auto
+node verify-controller-ts/dist/verify-loop.js verify --profile api
 node verify-controller-ts/dist/verify-loop.js verify --profile full
 ```
 
@@ -112,7 +115,7 @@ node verify-controller-ts/dist/verify-loop.js verify --profile staging
 
 ## 7. 新业务/新技术栈接入
 
-不要修改 Controller 源码来增加“某个框架的固定验证”。在 [verify/policy.json](../verify/policy.json) 增加 Gate，再挂到 Profile：
+不要修改 Controller 源码来增加“某个框架的固定验证”。后端真实接口先写 `acceptance/specs/<feature>.json`，再在 [acceptance/project.json](../acceptance/project.json) 配置 Maven/Gradle/pytest/npm 等项目命令；只有复杂认证、消息队列或故障注入才在 [verify/policy.json](../verify/policy.json) 增加受保护的 `module` Gate：
 
 ```json
 "python-contract": {

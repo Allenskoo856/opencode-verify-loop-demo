@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "acceptance/project/v1",
+  "backend": {
+    "runtime": {
+      "language": "java",
+      "languageVersion": "17",
+      "framework": "spring-boot",
+      "frameworkVersion": "3.x"
+    },
+    "test": {
+      "cwd": "server",
+      "command": "./gradlew test"
+    }
+  },
+  "frontend": {
+    "build": {
+      "cwd": "web",
+      "command": "npm ci --ignore-scripts && npm run build"
+    },
+    "unit": {
+      "cwd": "web",
+      "command": "npm ci --ignore-scripts && npm run test:unit"
+    },
+    "e2e": {
+      "cwd": "web",
+      "command": "npm run test:e2e"
+    }
+  }
+}

@@ -16,5 +16,6 @@ test('detects exact and recursive protected paths', () => {
 
 test('redacts secrets and validates required environment values', () => {
   assert.match(__test.redact('password=top-secret'), /\[REDACTED\]/)
+  assert.doesNotMatch(__test.redact('{"password":"top-secret","authorization":"Bearer jwt-value"}'), /top-secret|jwt-value/)
   assert.equal(__test.requirementFailure({ TARGET_ENV: 'staging' }), 'TARGET_ENV must be "staging"')
 })

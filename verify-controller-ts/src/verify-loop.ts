@@ -1,14 +1,20 @@
-import { spawn, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { existsSync, promises as fs } from 'node:fs'
 import { dirname, isAbsolute, relative, resolve } from 'node:path'
+import { runApiContract, runProjectTarget } from './acceptance.js'
+import { execute, type CommandResult } from './process.js'
+import { redact } from './security.js'
 
-type Runner = 'shell' | 'http' | 'module'
+type Runner = 'shell' | 'http' | 'module' | 'contract' | 'project'
 
 type GatePolicy = {
   runner: Runner
   command?: string
   url?: string
   module?: string
+  spec?: string
+  project?: string
+  target?: string
   expectedStatus?: number
   timeoutSeconds?: number
   requires?: Record<string, string>
@@ -47,16 +53,6 @@ type Evidence = {
   protectedViolation?: string[]
 }
 
-type CommandResult = { output: string; exitCode: number }
-
-const secretPattern = /(authorization:\s*bearer\s+|password|passwd|secret|token|api[_-]?key|cookie)(\s*[=:]\s*|\s+)[^\s,;]+/gi
-
-function redact(value: string): string {
-  return value
-    .replace(secretPattern, '$1$2[REDACTED]')
-    .replace(/gho_[A-Za-z0-9_]+/g, 'gho_[REDACTED]')
-}
-
 function rootDir(): string {
   return process.env.VERIFY_WORKTREE ? resolve(process.env.VERIFY_WORKTREE) : process.cwd()
 }
@@ -85,25 +81,6 @@ function protectedChanges(root: string, baseSha: string, patterns: string[]): st
     if (entry.length >= 4) changed.push(entry.slice(3).trim())
   }
   return [...new Set(changed.filter((file) => isProtectedPath(file, patterns)))]
-}
-
-async function execute(file: string, args: string[], cwd: string, timeoutSeconds: number): Promise<CommandResult> {
-  return await new Promise((done) => {
-    const child = spawn(file, args, { cwd, env: process.env, stdio: ['ignore', 'pipe', 'pipe'] })
-    let output = ''
-    child.stdout.on('data', (chunk) => { output += String(chunk) })
-    child.stderr.on('data', (chunk) => { output += String(chunk) })
-    const timer = setTimeout(() => child.kill('SIGTERM'), timeoutSeconds * 1000)
-    child.on('error', (error) => {
-      clearTimeout(timer)
-      done({ output: redact(`${output}\n${error.message}`), exitCode: 127 })
-    })
-    child.on('close', (code, signal) => {
-      clearTimeout(timer)
-      const exitCode = signal === 'SIGTERM' ? 124 : (code ?? 1)
-      done({ output: redact(output), exitCode })
-    })
-  })
 }
 
 function requirementFailure(requires: Record<string, string> | undefined): string | undefined {
@@ -136,6 +113,15 @@ async function executeGate(root: string, gate: GatePolicy, timeoutSeconds: numbe
     } catch (error) {
       return { output: redact(error instanceof Error ? error.message : String(error)), exitCode: 1 }
     }
+  }
+  if (gate.runner === 'contract') {
+    if (!gate.spec) return { output: 'contract gate is missing spec', exitCode: 2 }
+    const result = await runApiContract(root, gate.spec, process.env, timeoutSeconds)
+    return { output: result.output, exitCode: result.ok ? 0 : 1 }
+  }
+  if (gate.runner === 'project') {
+    if (!gate.project || !gate.target) return { output: 'project gate is missing project or target', exitCode: 2 }
+    return runProjectTarget(root, gate.project, gate.target, process.env, timeoutSeconds)
   }
   if (!gate.module) return { output: 'module gate is missing module', exitCode: 2 }
   try {
@@ -194,7 +180,7 @@ async function verify(root: string, policyFile: string, profile: string, model: 
     const gate = policy.gates[name]
     if (!gate) throw new Error(`profile ${profile} references unknown gate ${name}`)
     const started = Date.now()
-    const target = gate.command ?? gate.url ?? gate.module ?? ''
+    const target = gate.command ?? gate.url ?? gate.module ?? gate.spec ?? `${gate.project ?? ''}:${gate.target ?? ''}`
     const result = await executeGate(root, gate, gate.timeoutSeconds ?? policy.defaults?.timeoutSeconds ?? 1200)
     const status: GateEvidence['status'] = result.exitCode === 0 ? 'PASS' : (result.exitCode === 2 ? 'BLOCKED' : 'FAIL')
     const outputFile = await writeFile(root, runId, `${iteration}-${name}`, result.output)
@@ -234,7 +220,7 @@ async function main(): Promise<void> {
   const flags = parseFlags(process.argv.slice(3))
   const root = rootDir()
   const policyFile = flags.policy ?? 'verify/policy.json'
-  if (!command) throw new Error('usage: verify-loop verify|run|status|doctor|version')
+  if (!command) throw new Error('usage: verify-loop verify|run|accept|status|doctor|version')
   if (command === 'version') { console.log('verify-loop-ts 0.2.0'); return }
   if (command === 'doctor') {
     const needOpenCode = flags['require-opencode'] === 'true'
@@ -254,6 +240,14 @@ async function main(): Promise<void> {
     const latest = entries.sort().at(-1)
     if (!latest) { console.log('{"conclusion":"NO_RUN"}'); return }
     console.log(await fs.readFile(resolve(evidenceDir, latest, 'evidence.json'), 'utf8'))
+    return
+  }
+  if (command === 'accept') {
+    const specFile = flags.spec
+    if (!specFile) throw new Error('--spec is required for accept')
+    const result = await runApiContract(root, specFile, process.env, Number.parseInt(flags['timeout-seconds'] ?? '120', 10))
+    console.log(result.output)
+    process.exitCode = result.ok ? 0 : 1
     return
   }
   const profile = flags.profile ?? 'auto'

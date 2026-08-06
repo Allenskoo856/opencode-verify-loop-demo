@@ -18,7 +18,11 @@ public class SecurityConfig {
   @Bean PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
   @Bean UserDetailsService userDetailsService(AppUserRepository users) { return username -> users.findByEmail(username).map(u -> org.springframework.security.core.userdetails.User.withUsername(u.getEmail()).password(u.getPasswordHash()).authorities("ROLE_USER").build()).orElseThrow(() -> new org.springframework.security.core.userdetails.UsernameNotFoundException(username)); }
   @Bean SecurityFilterChain filterChain(HttpSecurity http, JwtService jwt, AppUserRepository users) throws Exception {
-    http.csrf().disable().cors().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests(a -> a.antMatchers("/api/auth/login", "/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll().antMatchers(HttpMethod.OPTIONS).permitAll().anyRequest().authenticated()).addFilterBefore(new JwtFilter(jwt), UsernamePasswordAuthenticationFilter.class);
+    http.csrf().disable().cors().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests(a -> a.antMatchers("/api/auth/login", "/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll().antMatchers(HttpMethod.OPTIONS).permitAll().anyRequest().authenticated()).exceptionHandling(e -> e.authenticationEntryPoint((request, response, exception) -> {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+      response.setContentType("application/json");
+      response.getWriter().write("{\"status\":401,\"error\":\"Unauthorized\",\"message\":\"需要登录\"}");
+    })).addFilterBefore(new JwtFilter(jwt), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
   @Bean CorsConfigurationSource corsConfigurationSource() { CorsConfiguration c = new CorsConfiguration(); c.setAllowedOrigins(Collections.singletonList("*")); c.setAllowedMethods(Collections.singletonList("*")); c.setAllowedHeaders(Collections.singletonList("*")); UrlBasedCorsConfigurationSource s = new UrlBasedCorsConfigurationSource(); s.registerCorsConfiguration("/**", c); return s; }

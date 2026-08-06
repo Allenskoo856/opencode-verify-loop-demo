@@ -19,6 +19,8 @@ cp "$root_dir/verify-controller-ts/dist/verify-loop.js" "$out_dir/verify-loop.js
 cp "$root_dir/.env.offline.example" "$out_dir/.env.offline.example"
 cp "$root_dir/deploy/compose.offline.yml" "$out_dir/compose.offline.yml"
 cp "$root_dir/verify/policy.json" "$out_dir/policy.json"
+mkdir -p "$out_dir/acceptance"
+cp -R "$root_dir/acceptance/." "$out_dir/acceptance/"
 mkdir -p "$out_dir/gates"
 cp "$root_dir"/verify/gates/*.cjs "$out_dir/gates/"
 (cd "$out_dir" && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)

@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve, relative } from 'node:path'
 import { tool } from '@opencode-ai/plugin'
 
-const protectedPatterns = [/^\.opencode\//, /^docs\/tasks\//, /^e2e\/specs\//, /^verify\/policy\.json$/, /^verify\/gates\//, /^offline\/SHA256SUMS$/]
+const protectedPatterns = [/^\.opencode\//, /^docs\/tasks\//, /^e2e\/specs\//, /^frontend\/e2e\//, /^acceptance\/specs\//, /^acceptance\/project\.json$/, /^verify\/policy\.json$/, /^verify\/gates\//, /^offline\/SHA256SUMS$/]
 
 export default async ({ worktree, client }: any) => ({
   tool: {

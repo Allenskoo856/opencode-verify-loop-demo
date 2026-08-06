@@ -6,7 +6,7 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test dist/verify-loop.test.js",
+    "test": "npm run build && node --test dist/*.test.js",
     "verify": "node dist/verify-loop.js verify --profile auto"
   },
   "devDependencies": {
