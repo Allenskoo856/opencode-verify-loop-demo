@@ -33,6 +33,7 @@ node verify-controller-ts/dist/verify-loop.js run \
 - [API、真实环境与前端自动化测试](docs/TESTING-MANUAL.md)
 - [OpenCode 插件和 Skills](docs/OPENCODE-INTEGRATION.md)
 - [Loop Acceptance 抽象：需求、真实 API、项目适配和前端循环](docs/LOOP-ACCEPTANCE.md)
+- [Loop Engineering 全栈实施手册：架构、内网、Java/Vue 与逐步提示词](docs/LOOP-ENGINEERING-PLAYBOOK.md)
 - [UOS/Debian 10 离线部署](docs/INTRANET-OFFLINE.md)
 
 ## 许可证
