@@ -28,7 +28,7 @@ class OrdersIntegrationTest {
     assertEquals(HttpStatus.OK, token.getStatusCode()); assertNotNull(token.getBody().get("accessToken"));
     HttpHeaders headers = new HttpHeaders(); headers.setBearerAuth((String) token.getBody().get("accessToken")); headers.setContentType(MediaType.APPLICATION_JSON);
     ResponseEntity<Map> created = http.exchange("/api/orders", HttpMethod.POST, new HttpEntity<>("{\"title\":\"container order\"}", headers), Map.class);
-    assertEquals(HttpStatus.OK, created.getStatusCode()); assertEquals("CREATED", created.getBody().get("status"));
+    assertEquals(HttpStatus.CREATED, created.getStatusCode()); assertEquals("CREATED", created.getBody().get("status"));
   }
   static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
     public void initialize(ConfigurableApplicationContext context) { TestPropertyValues.of("spring.datasource.url=" + POSTGRES.getJdbcUrl(), "spring.datasource.username=" + POSTGRES.getUsername(), "spring.datasource.password=" + POSTGRES.getPassword(), "JWT_SECRET=integration-test-secret-which-is-long-enough").applyTo(context.getEnvironment()); }
